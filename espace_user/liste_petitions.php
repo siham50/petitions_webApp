@@ -655,6 +655,228 @@ foreach ($petitions as $petition) {
         .hidden {
             display: none;
         }
+
+        /* Section Pétition Populaire */
+.popular-petition-section {
+    padding: 2rem 0;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(79, 70, 229, 0.1) 50%, rgba(124, 58, 237, 0.1) 100%);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.popular-petition-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border: 2px solid;
+    border-image: linear-gradient(135deg, var(--primary-blue), var(--primary-purple)) 1;
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    box-shadow: var(--shadow-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.popular-petition-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-blue), var(--primary-purple));
+}
+
+.popular-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-md);
+}
+
+.popular-badge svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.popular-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .popular-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+.popular-info h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.popular-info p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.popular-stats {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.popular-signature-count {
+    text-align: center;
+}
+
+.popular-count {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    line-height: 1;
+}
+
+.popular-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.popular-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.popular-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.popular-btn-primary {
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-indigo));
+    color: white;
+    box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.3);
+}
+
+.popular-btn-primary:hover {
+    background: linear-gradient(135deg, #1d4ed8, #4338ca);
+    transform: translateY(-2px);
+}
+
+.popular-btn-outline {
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.popular-btn-outline:hover {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+/* Animation de mise à jour */
+.popular-updating {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Loading State */
+.popular-loading {
+    text-align: center;
+    padding: 2rem;
+}
+
+.loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid var(--border-color);
+    border-top: 2px solid var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Transition pour le changement de pétition */
+.popular-transition-enter {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.popular-transition-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.popular-transition-exit {
+    opacity: 1;
+}
+
+.popular-transition-exit-active {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Animation pour les compteurs mis à jour */
+.count-updated {
+    animation: countPulse 1s ease-in-out;
+    color: var(--primary-blue);
+    font-weight: 600;
+}
+
+@keyframes countPulse {
+    0% {
+        transform: scale(1);
+        color: var(--primary-blue);
+    }
+    50% {
+        transform: scale(1.1);
+        color: #16a34a;
+    }
+    100% {
+        transform: scale(1);
+        color: var(--primary-blue);
+    }
+}
+
+/* Style pour les éléments en cours de mise à jour */
+.progress-count.updating {
+    opacity: 0.7;
+    color: var(--text-muted);
+}
     </style>
 </head>
 <body>
@@ -699,6 +921,19 @@ foreach ($petitions as $petition) {
             </div>
         </div>
 
+        <!-- Section Pétition Populaire -->
+<div class="popular-petition-section">
+    <div class="container">
+        <div class="popular-petition-card" id="popularPetitionCard">
+            <!-- Le contenu sera chargé dynamiquement -->
+            <div class="popular-loading">
+                <div class="loading-spinner"></div>
+                <p>Chargement de la pétition populaire...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
         <!-- Petitions Section -->
         <div class="container petitions-section">
             
@@ -737,24 +972,26 @@ foreach ($petitions as $petition) {
                             
                             <div class="card-content">
                                 <div class="progress-section">
-                                    <div class="progress-header">
-                                        <div class="progress-text">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                                <circle cx="9" cy="7" r="4"/>
-                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                            </svg>
-                                            <span>
-                                                <span class="progress-count"><?php echo $signatureCount; ?></span>
-                                                signatures
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 100%"></div>
-                                    </div>
-                                </div>
+    <div class="progress-header">
+        <div class="progress-text">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>
+                <span class="progress-count" id="signature-count-<?php echo $petition['idP']; ?>">
+                    <?php echo $signatureCount; ?>
+                </span>
+                signatures
+            </span>
+        </div>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: 100%"></div>
+    </div>
+</div>
                                 
                                 <div class="card-meta">
                                     <div class="meta-item">
@@ -820,24 +1057,26 @@ foreach ($petitions as $petition) {
                             
                             <div class="card-content">
                                 <div class="progress-section">
-                                    <div class="progress-header">
-                                        <div class="progress-text">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                                <circle cx="9" cy="7" r="4"/>
-                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                            </svg>
-                                            <span>
-                                                <span class="progress-count"><?php echo $signatureCount; ?></span>
-                                                signatures
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 100%"></div>
-                                    </div>
-                                </div>
+    <div class="progress-header">
+        <div class="progress-text">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>
+                <span class="progress-count" id="signature-count-<?php echo $petition['idP']; ?>">
+                    <?php echo $signatureCount; ?>
+                </span>
+                signatures
+            </span>
+        </div>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: 100%"></div>
+    </div>
+</div>
                                 
                                 <div class="card-meta">
                                     <div class="meta-item">
@@ -990,5 +1229,273 @@ foreach ($petitions as $petition) {
             document.body.style.overflow = '';
         }
     </script>
+
+<script>
+    // Gestion de la pétition populaire en temps réel
+    let currentPopularPetitionId = null;
+
+    function loadPopularPetition() {
+        fetch('get_popular_data.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updatePopularPetitionDisplay(data);
+                } else {
+                    showNoPopularPetition();
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors du chargement de la pétition populaire:', error);
+                showNoPopularPetition();
+            });
+    }
+
+    function updatePopularPetitionDisplay(data) {
+        const popularCard = document.getElementById('popularPetitionCard');
+        
+        // Vérifier si la pétition a changé
+        if (currentPopularPetitionId !== data.petition_id) {
+            // Animation de transition
+            popularCard.classList.add('popular-updating');
+            setTimeout(() => {
+                popularCard.innerHTML = createPopularPetitionHTML(data);
+                popularCard.classList.remove('popular-updating');
+                currentPopularPetitionId = data.petition_id;
+            }, 500);
+        } else {
+            // Mise à jour simple des compteurs
+            updatePopularPetitionCounters(data);
+        }
+    }
+
+    function createPopularPetitionHTML(data) {
+        return `
+            <div class="popular-transition-enter-active">
+                <div class="popular-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    PÉTITION LA PLUS POPULAIRE
+                </div>
+                
+                <div class="popular-content">
+                    <div class="popular-info">
+                        <h3>${data.titreP}</h3>
+                        <p>${data.descriptionP}</p>
+                        <div class="popular-actions">
+                            <a href="signature.php?id=${data.petition_id}" class="popular-btn popular-btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="8.5" cy="7" r="4"/>
+                                    <line x1="20" y1="8" x2="20" y2="14"/>
+                                    <line x1="23" y1="11" x2="17" y2="11"/>
+                                </svg>
+                                Signer cette pétition
+                            </a>
+                            <button class="popular-btn popular-btn-outline" onclick="showPetitionDetails(${JSON.stringify(data).replace(/"/g, '&quot;')})">
+                                Voir les détails
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="popular-stats">
+                        <div class="popular-signature-count">
+                            <div class="popular-count" id="popularSignatureCount">${data.signature_count}</div>
+                            <div class="popular-label">Signatures</div>
+                        </div>
+                        <div class="popular-meta">
+                            <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+                                Fin: ${new Date(data.dateFinP).toLocaleDateString('fr-FR')}
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                Mise à jour en temps réel
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function updatePopularPetitionCounters(data) {
+        const countElement = document.getElementById('popularSignatureCount');
+        if (countElement) {
+            // Animation du compteur
+            const currentCount = parseInt(countElement.textContent);
+            const targetCount = data.signature_count;
+            
+            if (currentCount !== targetCount) {
+                animateCounter(countElement, currentCount, targetCount, 1000);
+            }
+        }
+    }
+
+    function animateCounter(element, start, end, duration) {
+        const startTime = performance.now();
+        const step = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const currentValue = Math.floor(start + (end - start) * progress);
+            element.textContent = currentValue.toLocaleString();
+            
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                element.textContent = end.toLocaleString();
+            }
+        };
+        requestAnimationFrame(step);
+    }
+
+    function showNoPopularPetition() {
+        const popularCard = document.getElementById('popularPetitionCard');
+        popularCard.innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    Aucune pétition populaire à afficher pour le moment.
+                </p>
+                <a href="#" class="popular-btn popular-btn-primary" onclick="location.reload()">
+                    Actualiser la page
+                </a>
+            </div>
+        `;
+    }
+
+    // Charger la pétition populaire au démarrage
+    document.addEventListener('DOMContentLoaded', function() {
+        loadPopularPetition();
+        
+        // Mettre à jour toutes les 10 secondes
+        setInterval(loadPopularPetition, 10000);
+    });
+    </script>
+
+    <script>
+class SignatureUpdater {
+    constructor() {
+        this.updateInterval = 15000; // 15 secondes
+        this.isUpdating = false;
+        this.petitionIds = [];
+        this.init();
+    }
+
+    init() {
+        this.collectPetitionIds();
+        this.startAutoUpdate();
+        this.setupEventListeners();
+    }
+
+    collectPetitionIds() {
+        const signatureElements = document.querySelectorAll('[id^="signature-count-"]');
+        this.petitionIds = Array.from(signatureElements).map(element => 
+            element.id.replace('signature-count-', '')
+        );
+    }
+
+    async updateAllCounts() {
+        if (this.isUpdating) return;
+        
+        this.isUpdating = true;
+        
+        try {
+            const promises = this.petitionIds.map(petitionId => 
+                this.updateSingleCount(petitionId)
+            );
+            
+            await Promise.allSettled(promises);
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour des compteurs:', error);
+        } finally {
+            this.isUpdating = false;
+        }
+    }
+
+    async updateSingleCount(petitionId) {
+        try {
+            const response = await fetch(`get_signatures.php?petition_id=${petitionId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                const element = document.getElementById(`signature-count-${petitionId}`);
+                if (element) {
+                    const currentCount = parseInt(element.textContent);
+                    const newCount = data.signature_count;
+                    
+                    if (currentCount !== newCount) {
+                        this.animateCounter(element, currentCount, newCount, 500);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error(`Erreur pour la pétition ${petitionId}:`, error);
+        }
+    }
+
+    animateCounter(element, start, end, duration) {
+        return new Promise(resolve => {
+            const startTime = performance.now();
+            
+            const step = (currentTime) => {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                const currentValue = Math.floor(start + (end - start) * easeOutQuart);
+                
+                element.textContent = currentValue.toLocaleString();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    element.textContent = end.toLocaleString();
+                    element.classList.add('count-updated');
+                    
+                    setTimeout(() => {
+                        element.classList.remove('count-updated');
+                    }, 1000);
+                    
+                    resolve();
+                }
+            };
+            
+            requestAnimationFrame(step);
+        });
+    }
+
+    startAutoUpdate() {
+        // Première mise à jour après 2 secondes
+        setTimeout(() => this.updateAllCounts(), 2000);
+        
+        // Mises à jour régulières
+        setInterval(() => this.updateAllCounts(), this.updateInterval);
+    }
+
+    setupEventListeners() {
+        // Mettre à jour quand la page redevient visible
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                this.updateAllCounts();
+            }
+        });
+
+        // Mettre à jour quand la fenêtre reprend le focus
+        window.addEventListener('focus', () => {
+            this.updateAllCounts();
+        });
+    }
+
+    // Méthode pour forcer une mise à jour manuelle
+    forceUpdate() {
+        this.updateAllCounts();
+    }
+}
+
+// Initialiser le système de mise à jour
+document.addEventListener('DOMContentLoaded', function() {
+    window.signatureUpdater = new SignatureUpdater();
+});
+</script>
+
 </body>
 </html>

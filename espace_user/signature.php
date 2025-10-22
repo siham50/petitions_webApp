@@ -374,6 +374,277 @@ $signatureCount = $stmt->fetch()['count'];
             font-weight: 500;
         }
 
+        /* Section des dernières signatures */
+        .recent-signatures-section {
+            padding: 2rem 0;
+            max-width: 64rem;
+            margin: 0 auto;
+        }
+
+        .recent-signatures-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+
+        .recent-signatures-card::before {
+            content: 'Temps réel';
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            animation: gentlePulse 2s infinite;
+        }
+
+        @keyframes gentlePulse {
+            0% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0.8; transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .recent-signatures-card::before {
+                position: static;
+                display: block;
+                margin-bottom: 1rem;
+                text-align: center;
+            }
+        }
+
+        .recent-signatures-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .recent-signatures-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .recent-signatures-list {
+            min-height: 200px;
+        }
+
+        .signature-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .signature-item:last-child {
+            border-bottom: none;
+        }
+
+        .signature-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .signature-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .signature-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .signature-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .signature-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .signature-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .loading-signatures {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .loading-spinner-small {
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        .recent-signatures-update {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--border-color);
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .refresh-btn:active {
+            transform: scale(0.95);
+        }
+
+        .refresh-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .refresh-btn.loading svg {
+            animation: spin 1s linear infinite;
+        }
+
+        .no-signatures {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .signature-item.new-signature {
+            background: rgba(34, 197, 94, 0.15);
+            border-radius: var(--radius-md);
+            margin: 0.25rem 0;
+            padding: 0.75rem 1rem;
+            animation: highlightPulse 1.5s ease-out;
+            border-left: 3px solid #10b981;
+        }
+
+        .signature-country {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .signature-country::before {
+            content: "•";
+            color: var(--text-muted);
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: livePulse 1.5s infinite;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes highlightPulse {
+            0% {
+                background: rgba(34, 197, 94, 0.3);
+                transform: translateX(-10px);
+            }
+            60% {
+                background: rgba(34, 197, 94, 0.15);
+                transform: translateX(0);
+            }
+            100% {
+                background: rgba(34, 197, 94, 0.15);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes livePulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .recent-signatures-card {
+                padding: 1.5rem;
+            }
+            
+            .signature-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .signature-time {
+                align-self: flex-end;
+            }
+        }
+
         /* Footer */
         .footer {
             background: rgba(255, 255, 255, 0.3);
@@ -512,14 +783,14 @@ $signatureCount = $stmt->fetch()['count'];
                 <!-- Message de succès -->
                 <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
                     <div class="success-message">
-                        <p>✅ Merci ! Votre signature a été enregistrée avec succès.</p>
+                        <p> Merci ! Votre signature a été enregistrée avec succès.</p>
                     </div>
                 <?php endif; ?>
 
                 <!-- Message d'erreur -->
                 <?php if (isset($_GET['error'])): ?>
                     <div class="error-message">
-                        <p>❌ <?php echo htmlspecialchars($_GET['error']); ?></p>
+                        <p> <?php echo htmlspecialchars($_GET['error']); ?></p>
                     </div>
                 <?php endif; ?>
 
@@ -595,6 +866,48 @@ $signatureCount = $stmt->fetch()['count'];
                         </form>
                     </div>
                 </div>
+
+                <!-- Section des dernières signatures -->
+                <div class="recent-signatures-section">
+                    <div class="container">
+                        <div class="recent-signatures-card">
+                            <h3 class="recent-signatures-title">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                                Dernières signatures 
+                                <span class="live-indicator">
+                                    <span class="live-dot"></span>
+                                    EN DIRECT
+                                </span>
+                            </h3>
+                            <p class="recent-signatures-subtitle">Les 5 dernières personnes ayant signé cette pétition - Mise à jour instantanée</p>
+                            
+                            <div id="recentSignaturesList" class="recent-signatures-list">
+                                <!-- Les signatures seront chargées ici dynamiquement -->
+                                <div class="loading-signatures">
+                                    <div class="loading-spinner-small"></div>
+                                    <p>Chargement des signatures en temps réel...</p>
+                                </div>
+                            </div>
+                            
+                            <div class="recent-signatures-update">
+                                <span id="lastUpdateTime"></span>
+                                <button onclick="loadRecentSignatures(true)" class="refresh-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M23 4v6h-6"/>
+                                        <path d="M1 20v-6h6"/>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                                    </svg>
+                                    Actualiser
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -658,6 +971,278 @@ $signatureCount = $stmt->fetch()['count'];
                 return false;
             }
         });
+
+        // Gestion des signatures récentes en temps réel
+        let lastSignaturesHash = '';
+        let autoRefreshInterval = null;
+        let retryCount = 0;
+        const MAX_RETRIES = 5;
+
+        function loadRecentSignatures(showLoading = false) {
+            const petitionId = <?php echo $petitionId; ?>;
+            const refreshBtn = document.querySelector('.refresh-btn');
+            const signaturesList = document.getElementById('recentSignaturesList');
+            
+            if (showLoading && refreshBtn) {
+                refreshBtn.classList.add('loading');
+            }
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `get_recent_signatures.php?petition_id=${petitionId}&t=${new Date().getTime()}`, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.timeout = 3000; // Timeout court pour réactivité
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (refreshBtn) refreshBtn.classList.remove('loading');
+                    
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            
+                            if (response.success) {
+                                updateSignaturesDisplay(response.signatures);
+                                updateLastUpdateTime(response.timestamp);
+                                
+                                // Vérifier si de nouvelles signatures sont arrivées
+                                const currentHash = generateSignaturesHash(response.signatures);
+                                if (currentHash !== lastSignaturesHash && lastSignaturesHash !== '') {
+                                    showNewSignatureNotification(response.signatures[0]);
+                                }
+                                lastSignaturesHash = currentHash;
+                                retryCount = 0; // Réinitialiser le compteur d'erreurs
+                                
+                            } else {
+                                showSignaturesError(response.message);
+                            }
+                        } catch (e) {
+                            showSignaturesError('Erreur lors du traitement des données');
+                        }
+                    } else {
+                        handleConnectionError();
+                    }
+                }
+            };
+            
+            xhr.ontimeout = function() {
+                handleConnectionError();
+            };
+            
+            xhr.onerror = function() {
+                handleConnectionError();
+            };
+            
+            xhr.send();
+        }
+
+        function handleConnectionError() {
+            retryCount++;
+            if (retryCount <= MAX_RETRIES) {
+                // Réessayer rapidement avec un backoff exponentiel
+                const delay = Math.min(1000 * Math.pow(1.5, retryCount), 5000);
+                setTimeout(() => loadRecentSignatures(), delay);
+                showSignaturesError(`Connexion perdue - nouvelle tentative dans ${delay/1000}s...`);
+            } else {
+                showSignaturesError('Connexion interrompue - réessayez plus tard');
+            }
+        }
+
+        function generateSignaturesHash(signatures) {
+            return btoa(JSON.stringify(signatures.map(s => s.prenom + s.nom + s.date + s.heure)));
+        }
+
+        function updateSignaturesDisplay(signatures) {
+            const signaturesList = document.getElementById('recentSignaturesList');
+            
+            if (signatures.length === 0) {
+                signaturesList.innerHTML = `
+                    <div class="no-signatures">
+                        <p>Aucune signature pour le moment</p>
+                        <p style="font-size: 0.75rem; margin-top: 0.5rem;">Soyez le premier à signer !</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            signatures.forEach((signature, index) => {
+                // Marquer seulement la toute dernière signature comme nouvelle
+                const isNew = index === 0 && signaturesList.children.length > 0;
+                html += `
+                    <div class="signature-item ${isNew ? 'new-signature' : ''}">
+                        <div class="signature-info">
+                            <div class="signature-avatar">
+                                ${signature.initials}
+                            </div>
+                            <div class="signature-details">
+                                <div class="signature-name">
+                                    ${signature.prenom} ${signature.nom}
+                                </div>
+                                <div class="signature-meta">
+                                    <span>${signature.display_date}</span>
+                                    ${signature.pays ? `<span class="signature-country">${signature.pays}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="signature-time">
+                            ${signature.display_time}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            signaturesList.innerHTML = html;
+        }
+
+        function updateLastUpdateTime(timestamp) {
+            const updateElement = document.getElementById('lastUpdateTime');
+            if (updateElement) {
+                const now = new Date();
+                updateElement.textContent = `Dernière mise à jour: ${now.toLocaleTimeString('fr-FR')}`;
+            }
+        }
+
+        function showSignaturesError(message) {
+            const signaturesList = document.getElementById('recentSignaturesList');
+            if (signaturesList) {
+                signaturesList.innerHTML = `
+                    <div class="no-signatures">
+                        <p style="color: #dc2626;"> ${message}</p>
+                        <button onclick="loadRecentSignatures(true)" class="refresh-btn" style="margin-top: 0.5rem;">
+                            Réessayer maintenant
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function showNewSignatureNotification(newSignature) {
+            // Créer une notification toast plus visible
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: var(--radius-lg);
+                box-shadow: var(--shadow-xl);
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+                font-size: 0.875rem;
+                font-weight: 500;
+                max-width: 300px;
+                border-left: 4px solid #047857;
+            `;
+            toast.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                    <span style="font-size: 1.2em;"></span>
+                    <strong>Nouvelle signature !</strong>
+                </div>
+                <div>${newSignature.prenom} ${newSignature.nom} vient de signer</div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+        // Configuration du rafraîchissement en temps réel
+        function startRealTimeUpdates() {
+            // Rafraîchissement très rapide - toutes les 2 secondes
+            autoRefreshInterval = setInterval(() => {
+                loadRecentSignatures();
+            }, 2000);
+        }
+
+        function stopRealTimeUpdates() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+
+        // Gestion de la visibilité de la page pour optimiser les performances
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopRealTimeUpdates();
+            } else {
+                startRealTimeUpdates();
+                // Rafraîchir immédiatement quand la page redevient visible
+                loadRecentSignatures(true);
+            }
+        });
+
+        // Détection de la connexion réseau
+        window.addEventListener('online', function() {
+            startRealTimeUpdates();
+            loadRecentSignatures(true);
+        });
+
+        window.addEventListener('offline', function() {
+            stopRealTimeUpdates();
+            showSignaturesError('Connexion perdue - vérifiez votre connexion internet');
+        });
+
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Premier chargement immédiat
+            loadRecentSignatures(true);
+            
+            // Démarrer les mises à jour en temps réel
+            startRealTimeUpdates();
+            
+            // Rafraîchir aussi quand le formulaire est soumis
+            const signatureForm = document.getElementById('signatureForm');
+            if (signatureForm) {
+                signatureForm.addEventListener('submit', function() {
+                    // Rafraîchir immédiatement après la soumission
+                    setTimeout(() => {
+                        loadRecentSignatures(true);
+                    }, 1000);
+                });
+            }
+        });
+
+        // Nettoyage
+        window.addEventListener('beforeunload', function() {
+            stopRealTimeUpdates();
+        });
+
+        // Styles d'animation pour les notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

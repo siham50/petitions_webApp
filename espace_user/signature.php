@@ -926,6 +926,7 @@ $signatureCount = $stmt->fetch()['count'];
                         <li><a href="#">Conditions d'utilisation</a></li>
                         <li><a href="#">Politique de confidentialité</a></li>
                         <li><a href="#">FAQ</a></li>
+                        <li><a href="../espace_admin/login.php">Administration</a></li>
                     </ul>
                 </div>
                 <div class="footer-social">

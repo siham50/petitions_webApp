@@ -1231,23 +1231,47 @@ foreach ($petitions as $petition) {
     </script>
 
 <script>
-    // Gestion de la pétition populaire en temps réel
+    // Gestion de la pétition populaire en temps réel avec XMLHttpRequest
     let currentPopularPetitionId = null;
 
     function loadPopularPetition() {
-        fetch('get_popular_data.php')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updatePopularPetitionDisplay(data);
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'get_popular_data.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.timeout = 5000; // Timeout de 5 secondes
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.success) {
+                            updatePopularPetitionDisplay(data);
+                        } else {
+                            showNoPopularPetition();
+                        }
+                    } catch (error) {
+                        console.error('Erreur parsing JSON:', error);
+                        showNoPopularPetition();
+                    }
                 } else {
+                    console.error('Erreur HTTP:', xhr.status);
                     showNoPopularPetition();
                 }
-            })
-            .catch(error => {
-                console.error('Erreur lors du chargement de la pétition populaire:', error);
-                showNoPopularPetition();
-            });
+            }
+        };
+        
+        xhr.ontimeout = function() {
+            console.error('Timeout lors du chargement de la pétition populaire');
+            showNoPopularPetition();
+        };
+        
+        xhr.onerror = function() {
+            console.error('Erreur réseau lors du chargement de la pétition populaire');
+            showNoPopularPetition();
+        };
+        
+        xhr.send();
     }
 
     function updatePopularPetitionDisplay(data) {
@@ -1269,6 +1293,10 @@ foreach ($petitions as $petition) {
     }
 
     function createPopularPetitionHTML(data) {
+        const isActive = new Date(data.dateFinP) > new Date();
+        const statusText = isActive ? 'Active' : 'Fermée';
+        const statusClass = isActive ? 'active' : 'closed';
+        
         return `
             <div class="popular-transition-enter-active">
                 <div class="popular-badge">
@@ -1278,20 +1306,35 @@ foreach ($petitions as $petition) {
                     PÉTITION LA PLUS POPULAIRE
                 </div>
                 
+                <div class="status-badge ${statusClass}" style="margin-bottom: 1rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        ${isActive ? 
+                            '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>' :
+                            '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>'
+                        }
+                    </svg>
+                    ${statusText}
+                </div>
+                
                 <div class="popular-content">
                     <div class="popular-info">
                         <h3>${data.titreP}</h3>
                         <p>${data.descriptionP}</p>
                         <div class="popular-actions">
-                            <a href="signature.php?id=${data.petition_id}" class="popular-btn popular-btn-primary">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="8.5" cy="7" r="4"/>
-                                    <line x1="20" y1="8" x2="20" y2="14"/>
-                                    <line x1="23" y1="11" x2="17" y2="11"/>
-                                </svg>
-                                Signer cette pétition
-                            </a>
+                            ${isActive ? 
+                                `<a href="signature.php?id=${data.petition_id}" class="popular-btn popular-btn-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="8.5" cy="7" r="4"/>
+                                        <line x1="20" y1="8" x2="20" y2="14"/>
+                                        <line x1="23" y1="11" x2="17" y2="11"/>
+                                    </svg>
+                                    Signer cette pétition
+                                </a>` :
+                                `<button class="popular-btn" style="opacity: 0.5; cursor: not-allowed; background: #ccc;">
+                                    Pétition fermée
+                                </button>`
+                            }
                             <button class="popular-btn popular-btn-outline" onclick="showPetitionDetails(${JSON.stringify(data).replace(/"/g, '&quot;')})">
                                 Voir les détails
                             </button>
@@ -1308,7 +1351,7 @@ foreach ($petitions as $petition) {
                                 Fin: ${new Date(data.dateFinP).toLocaleDateString('fr-FR')}
                             </div>
                             <div style="font-size: 0.75rem; color: var(--text-muted);">
-                                Mise à jour en temps réel
+                              Mise à jour en temps réel
                             </div>
                         </div>
                     </div>
@@ -1326,17 +1369,27 @@ foreach ($petitions as $petition) {
             
             if (currentCount !== targetCount) {
                 animateCounter(countElement, currentCount, targetCount, 1000);
+                
+                // Animation visuelle pour indiquer la mise à jour
+                countElement.classList.add('count-updated');
+                setTimeout(() => {
+                    countElement.classList.remove('count-updated');
+                }, 1000);
             }
         }
     }
 
     function animateCounter(element, start, end, duration) {
         const startTime = performance.now();
+        
         const step = (currentTime) => {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
-            const currentValue = Math.floor(start + (end - start) * progress);
+            // Easing function pour une animation plus naturelle
+            const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+            const currentValue = Math.floor(start + (end - start) * easeOutQuart);
+            
             element.textContent = currentValue.toLocaleString();
             
             if (progress < 1) {
@@ -1345,19 +1398,20 @@ foreach ($petitions as $petition) {
                 element.textContent = end.toLocaleString();
             }
         };
+        
         requestAnimationFrame(step);
     }
 
-    function showNoPopularPetition() {
+    function showNoPopularPetition(message = 'Aucune pétition populaire à afficher') {
         const popularCard = document.getElementById('popularPetitionCard');
         popularCard.innerHTML = `
             <div style="text-align: center; padding: 2rem;">
                 <p style="color: var(--text-secondary); margin-bottom: 1rem;">
-                    Aucune pétition populaire à afficher pour le moment.
+                    ${message}
                 </p>
-                <a href="#" class="popular-btn popular-btn-primary" onclick="location.reload()">
-                    Actualiser la page
-                </a>
+                <button class="popular-btn popular-btn-primary" onclick="loadPopularPetition()">
+                    Réessayer
+                </button>
             </div>
         `;
     }
@@ -1366,15 +1420,16 @@ foreach ($petitions as $petition) {
     document.addEventListener('DOMContentLoaded', function() {
         loadPopularPetition();
         
-        // Mettre à jour toutes les 10 secondes
-        setInterval(loadPopularPetition, 10000);
+        // Mettre à jour toutes les 3 secondes
+        setInterval(loadPopularPetition, 3000);
     });
-    </script>
+</script>
+
 
     <script>
 class SignatureUpdater {
     constructor() {
-        this.updateInterval = 15000; // 15 secondes
+        this.updateInterval = 3000; // 3 secondes
         this.isUpdating = false;
         this.petitionIds = [];
         this.init();
@@ -1393,43 +1448,68 @@ class SignatureUpdater {
         );
     }
 
-    async updateAllCounts() {
+    updateAllCounts() {
         if (this.isUpdating) return;
         
         this.isUpdating = true;
         
-        try {
-            const promises = this.petitionIds.map(petitionId => 
-                this.updateSingleCount(petitionId)
-            );
-            
-            await Promise.allSettled(promises);
-        } catch (error) {
-            console.error('Erreur lors de la mise à jour des compteurs:', error);
-        } finally {
-            this.isUpdating = false;
-        }
+        // Utiliser XMLHttpRequest au lieu de fetch
+        const promises = this.petitionIds.map(petitionId => 
+            this.updateSingleCount(petitionId)
+        );
+        
+        Promise.allSettled(promises)
+            .finally(() => {
+                this.isUpdating = false;
+            });
     }
 
-    async updateSingleCount(petitionId) {
-        try {
-            const response = await fetch(`get_signatures.php?petition_id=${petitionId}`);
-            const data = await response.json();
+    updateSingleCount(petitionId) {
+        return new Promise((resolve) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `get_signatures.php?petition_id=${petitionId}`, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.timeout = 3000; // Timeout de 3 secondes
             
-            if (data.success) {
-                const element = document.getElementById(`signature-count-${petitionId}`);
-                if (element) {
-                    const currentCount = parseInt(element.textContent);
-                    const newCount = data.signature_count;
-                    
-                    if (currentCount !== newCount) {
-                        this.animateCounter(element, currentCount, newCount, 500);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            
+                            if (data.success) {
+                                const element = document.getElementById(`signature-count-${petitionId}`);
+                                if (element) {
+                                    const currentCount = parseInt(element.textContent);
+                                    const newCount = data.signature_count;
+                                    
+                                    if (currentCount !== newCount) {
+                                        this.animateCounter(element, currentCount, newCount, 500);
+                                    }
+                                }
+                            }
+                        } catch (error) {
+                            console.error(`Erreur parsing JSON pour ${petitionId}:`, error);
+                        }
+                    } else {
+                        console.error(`Erreur HTTP ${xhr.status} pour ${petitionId}`);
                     }
+                    resolve();
                 }
-            }
-        } catch (error) {
-            console.error(`Erreur pour la pétition ${petitionId}:`, error);
-        }
+            }.bind(this); // Important: lier le contexte
+            
+            xhr.ontimeout = function() {
+                console.error(`Timeout pour la pétition ${petitionId}`);
+                resolve();
+            };
+            
+            xhr.onerror = function() {
+                console.error(`Erreur réseau pour ${petitionId}`);
+                resolve();
+            };
+            
+            xhr.send();
+        });
     }
 
     animateCounter(element, start, end, duration) {
@@ -1467,7 +1547,7 @@ class SignatureUpdater {
         // Première mise à jour après 2 secondes
         setTimeout(() => this.updateAllCounts(), 2000);
         
-        // Mises à jour régulières
+        // Mises à jour régulières toutes les 3 secondes
         setInterval(() => this.updateAllCounts(), this.updateInterval);
     }
 

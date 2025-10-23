@@ -1577,5 +1577,217 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<script>
+class PetitionNotification {
+    constructor() {
+        this.checkInterval = 5000; // Vérifier toutes les 5 secondes
+        this.lastCheckTime = 0;
+        this.isChecking = false;
+        this.notificationContainer = null;
+        this.init();
+    }
+
+    init() {
+        this.createNotificationContainer();
+        this.startPolling();
+        this.setupEventListeners();
+    }
+
+    createNotificationContainer() {
+        this.notificationContainer = document.createElement('div');
+        this.notificationContainer.id = 'petition-notifications';
+        this.notificationContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        `;
+        document.body.appendChild(this.notificationContainer);
+    }
+
+    startPolling() {
+        // Première vérification après 2 secondes
+        setTimeout(() => this.checkForNewPetitions(), 2000);
+        
+        // Vérifications régulières
+        setInterval(() => this.checkForNewPetitions(), this.checkInterval);
+    }
+
+    checkForNewPetitions() {
+        if (this.isChecking) return;
+        
+        this.isChecking = true;
+        
+        const xhr = new XMLHttpRequest();
+        // Chemin corrigé vers le fichier dans le dossier includes en racine
+        xhr.open('GET', '../includes/check_new_petitions.php?t=' + Date.now(), true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === 4) {
+                this.isChecking = false;
+                
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        this.handleResponse(response);
+                    } catch (error) {
+                        console.error('Erreur parsing JSON:', error);
+                    }
+                }
+            }
+        };
+        
+        xhr.onerror = () => {
+            this.isChecking = false;
+            console.error('Erreur réseau lors de la vérification des nouvelles pétitions');
+        };
+        
+        xhr.send();
+    }
+
+    handleResponse(response) {
+        if (response.success && response.has_new_petition && response.petition) {
+            this.showNewPetitionNotification(response.petition, response.message);
+        }
+    }
+
+    showNewPetitionNotification(petition, message) {
+        // Vérifier si une notification pour cette pétition existe déjà
+        const existingNotifications = this.notificationContainer.querySelectorAll('.new-petition-notification');
+        for (let notif of existingNotifications) {
+            if (notif.dataset.petitionId === petition.idP.toString()) {
+                return; // Ne pas afficher de doublon
+            }
+        }
+
+        const notification = document.createElement('div');
+        notification.className = 'new-petition-notification';
+        notification.dataset.petitionId = petition.idP;
+        notification.style.cssText = `
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border-left: 4px solid #047857;
+            animation: slideInRight 0.5s ease-out;
+            cursor: pointer;
+            position: relative;
+            backdrop-filter: blur(10px);
+        `;
+
+        notification.innerHTML = `
+            <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                <div style="flex-shrink: 0;">
+                    <svg style="width: 1.5rem; height: 1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                </div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem; font-weight: 600;">
+                        Nouvelle Pétition !
+                    </h4>
+                    <p style="margin: 0 0 0.25rem 0; font-size: 0.875rem; opacity: 0.9;">
+                        <strong>${petition.titreP}</strong>
+                    </p>
+                    <p style="margin: 0; font-size: 0.75rem; opacity: 0.8;">
+                        ${message}
+                    </p>
+                </div>
+                <button class="notification-close" style="background: none; border: none; color: white; cursor: pointer; padding: 0.25rem; opacity: 0.7; transition: opacity 0.2s;">
+                    <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        `;
+
+        // Ajouter au conteneur
+        this.notificationContainer.insertBefore(notification, this.notificationContainer.firstChild);
+
+        // Fermer au clic sur la croix
+        const closeBtn = notification.querySelector('.notification-close');
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.removeNotification(notification);
+        });
+
+        // Rediriger vers la pétition au clic
+        notification.addEventListener('click', () => {
+            window.location.href = `signature.php?id=${petition.idP}`;
+        });
+
+        // Fermer automatiquement après 8 secondes
+        setTimeout(() => {
+            if (notification.parentNode) {
+                this.removeNotification(notification);
+            }
+        }, 8000);
+    }
+
+    removeNotification(notification) {
+        notification.style.animation = 'slideOutRight 0.5s ease-in';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 500);
+    }
+
+    setupEventListeners() {
+        // Recharger la page quand elle redevient visible
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                this.checkForNewPetitions();
+            }
+        });
+    }
+}
+
+// CSS pour les animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    
+    .new-petition-notification:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s ease;
+    }
+    
+    .notification-close:hover {
+        opacity: 1 !important;
+    }
+`;
+document.head.appendChild(style);
+
+// Initialiser le système de notification
+document.addEventListener('DOMContentLoaded', function() {
+    window.petitionNotifier = new PetitionNotification();
+});
+</script>
+
 </body>
 </html>

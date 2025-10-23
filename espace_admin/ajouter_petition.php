@@ -77,7 +77,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Message de succès
             $success = "La pétition a été ajoutée avec succès !";
-            
+
+        // Émettre un signal pour la nouvelle pétition
+try {
+    $lastId = $pdo->lastInsertId();
+    
+    // Utiliser le dossier includes existant à la racine
+    $signalFile = __DIR__ . '/../includes/new_petition_signal.json';
+    
+    // Créer un fichier de signal
+    $signalData = [
+        'type' => 'new_petition',
+        'petition_id' => $lastId,
+        'timestamp' => time(),
+        'title' => $formData['titre'],
+        'admin' => $adminInfo['username'] ?? 'Admin'
+    ];
+    
+    $result = file_put_contents($signalFile, json_encode($signalData));
+    
+    if ($result === false) {
+        error_log("Impossible d'écrire le fichier de signal dans: " . $signalFile);
+    } else {
+        error_log("Signal créé avec succès: " . $signalFile);
+    }
+    
+} catch (Exception $e) {
+    // Ne pas interrompre le processus si le signal échoue
+    error_log("Erreur signal nouvelle pétition: " . $e->getMessage());
+}
+
+// Réinitialisation du formulaire
+$formData = [
+    'titre' => '',
+    'description' => '',
+    'dateFin' => '',
+    'porteur' => '',
+    'email' => ''
+];       
             // Réinitialisation du formulaire
             $formData = [
                 'titre' => '',
@@ -431,6 +468,7 @@ if (isset($_GET['logout'])) {
             }
         }
     </style>
+
 </head>
 <body>
     <!-- Header -->

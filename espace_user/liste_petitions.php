@@ -1,19 +1,22 @@
 <?php
+// Inclusion du fichier de configuration de la base de données
 require_once __DIR__ . '/../includes/database.php';
 
+// Récupération de toutes les pétitions triées par date d'ajout (plus récentes en premier)
 $stmt = $pdo->query("SELECT * FROM petition ORDER BY dateAjoutP DESC");
 $petitions = $stmt->fetchAll();
 
 // Séparer les pétitions actives et fermées
-$activePetitions = [];
-$closedPetitions = [];
+$activePetitions = [];  // Tableau pour stocker les pétitions actives
+$closedPetitions = [];  // Tableau pour stocker les pétitions fermées
 
 foreach ($petitions as $petition) {
+    // Vérifier si la pétition est encore active (date de fin > date actuelle)
     $isActive = strtotime($petition['dateFinP']) > time();
     if ($isActive) {
-        $activePetitions[] = $petition;
+        $activePetitions[] = $petition;  // Ajouter aux pétitions actives
     } else {
-        $closedPetitions[] = $petition;
+        $closedPetitions[] = $petition;  // Ajouter aux pétitions fermées
     }
 }
 ?>
@@ -27,12 +30,14 @@ foreach ($petitions as $petition) {
     <link rel="stylesheet" href="liste_petitions.css">
 </head>
 <body>
-    <!-- Header -->
+    <!-- En-tête du site -->
     <header class="header">
         <div class="container">
             <div class="header-content">
+                <!-- Section du logo -->
                 <div class="logo-section">
                     <div class="logo-icon">
+                        <!-- Icône SVG du logo -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
                             <polyline points="14 2 14 8 20 8"/>
@@ -46,6 +51,7 @@ foreach ($petitions as $petition) {
                         <p class="logo-subtitle">Plateforme de pétitions citoyennes</p>
                     </div>
                 </div>
+                <!-- Navigation principale -->
                 <nav class="nav-menu">
                     <a href="#" class="nav-link">À propos</a>
                     <a href="#" class="nav-link">Contact</a>
@@ -54,9 +60,9 @@ foreach ($petitions as $petition) {
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Contenu principal -->
     <main>
-        <!-- Hero Section -->
+        <!-- Section hero (bannière principale) -->
         <div class="hero-section">
             <div class="hero-overlay"></div>
             <div class="container hero-content">
@@ -68,11 +74,11 @@ foreach ($petitions as $petition) {
             </div>
         </div>
 
-        <!-- Section Pétition Populaire -->
+        <!-- Section de la pétition populaire (chargée dynamiquement) -->
         <div class="popular-petition-section">
             <div class="container">
                 <div class="popular-petition-card" id="popularPetitionCard">
-                    <!-- Le contenu sera chargé dynamiquement -->
+                    <!-- Contenu de chargement en attendant les données -->
                     <div class="popular-loading">
                         <div class="loading-spinner"></div>
                         <p>Chargement de la pétition populaire...</p>
@@ -81,13 +87,14 @@ foreach ($petitions as $petition) {
             </div>
         </div>
 
-        <!-- Petitions Section -->
+        <!-- Section principale des pétitions -->
         <div class="container petitions-section">
             
-            <!-- Pétitions Actives -->
+            <!-- Section des pétitions actives -->
             <?php if (count($activePetitions) > 0): ?>
             <div class="petitions-category">
                 <h2 class="category-title active-title">
+                    <!-- Icône de validation pour les pétitions actives -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                         <polyline points="22 4 12 14.01 9 11.01"/>
@@ -95,15 +102,19 @@ foreach ($petitions as $petition) {
                     Pétitions Actives (<?php echo count($activePetitions); ?>)
                 </h2>
                 <div class="petitions-grid">
+                    <!-- Boucle pour afficher chaque pétition active -->
                     <?php foreach ($activePetitions as $petition): ?>
                         <?php
+                        // Compter le nombre de signatures pour cette pétition
                         $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM signature WHERE idP = ?");
                         $stmt->execute([$petition['idP']]);
                         $signatureCount = $stmt->fetch()['count'];
                         ?>
                         
+                        <!-- Carte de pétition individuelle -->
                         <div class="petition-card">
                             <div class="card-header">
+                                <!-- Badge de statut actif -->
                                 <div class="status-badge active">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
@@ -118,9 +129,11 @@ foreach ($petitions as $petition) {
                             </div>
                             
                             <div class="card-content">
+                                <!-- Section de progression des signatures -->
                                 <div class="progress-section">
                                     <div class="progress-header">
                                         <div class="progress-text">
+                                            <!-- Icône de personnes -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                                                 <circle cx="9" cy="7" r="4"/>
@@ -135,13 +148,16 @@ foreach ($petitions as $petition) {
                                             </span>
                                         </div>
                                     </div>
+                                    <!-- Barre de progression (toujours à 100% pour l'affichage) -->
                                     <div class="progress-bar">
                                         <div class="progress-fill" style="width: 100%"></div>
                                     </div>
                                 </div>
                                 
+                                <!-- Métadonnées de la pétition -->
                                 <div class="card-meta">
                                     <div class="meta-item">
+                                        <!-- Icône de calendrier -->
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                                             <line x1="16" y1="2" x2="16" y2="6"/>
@@ -153,6 +169,7 @@ foreach ($petitions as $petition) {
                                 </div>
                             </div>
                             
+                            <!-- Pied de carte avec actions -->
                             <div class="card-footer">
                                 <a href="signature.php?id=<?php echo $petition['idP']; ?>" class="btn btn-primary">
                                     Signer la pétition
@@ -167,10 +184,11 @@ foreach ($petitions as $petition) {
             </div>
             <?php endif; ?>
 
-            <!-- Pétitions Fermées -->
+            <!-- Section des pétitions fermées -->
             <?php if (count($closedPetitions) > 0): ?>
             <div class="petitions-category">
                 <h2 class="category-title closed-title">
+                    <!-- Icône de croix pour les pétitions fermées -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="15" y1="9" x2="9" y2="15"/>
@@ -179,15 +197,19 @@ foreach ($petitions as $petition) {
                     Pétitions Fermées (<?php echo count($closedPetitions); ?>)
                 </h2>
                 <div class="petitions-grid">
+                    <!-- Boucle pour afficher chaque pétition fermée -->
                     <?php foreach ($closedPetitions as $petition): ?>
                         <?php
+                        // Compter le nombre de signatures pour cette pétition
                         $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM signature WHERE idP = ?");
                         $stmt->execute([$petition['idP']]);
                         $signatureCount = $stmt->fetch()['count'];
                         ?>
                         
+                        <!-- Carte de pétition individuelle -->
                         <div class="petition-card">
                             <div class="card-header">
+                                <!-- Badge de statut fermé -->
                                 <div class="status-badge closed">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="12" cy="12" r="10"/>
@@ -203,9 +225,11 @@ foreach ($petitions as $petition) {
                             </div>
                             
                             <div class="card-content">
+                                <!-- Section de progression des signatures -->
                                 <div class="progress-section">
                                     <div class="progress-header">
                                         <div class="progress-text">
+                                            <!-- Icône de personnes -->
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                                                 <circle cx="9" cy="7" r="4"/>
@@ -220,13 +244,16 @@ foreach ($petitions as $petition) {
                                             </span>
                                         </div>
                                     </div>
+                                    <!-- Barre de progression -->
                                     <div class="progress-bar">
                                         <div class="progress-fill" style="width: 100%"></div>
                                     </div>
                                 </div>
                                 
+                                <!-- Métadonnées de la pétition -->
                                 <div class="card-meta">
                                     <div class="meta-item">
+                                        <!-- Icône de calendrier -->
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                                             <line x1="16" y1="2" x2="16" y2="6"/>
@@ -238,6 +265,7 @@ foreach ($petitions as $petition) {
                                 </div>
                             </div>
                             
+                            <!-- Pied de carte avec actions (bouton désactivé pour pétitions fermées) -->
                             <div class="card-footer">
                                 <button class="btn btn-primary" style="opacity: 0.5; cursor: not-allowed;">
                                     Pétition fermée
@@ -252,7 +280,7 @@ foreach ($petitions as $petition) {
             </div>
             <?php endif; ?>
 
-            <!-- Message si aucune pétition -->
+            <!-- Message affiché quand il n'y a aucune pétition -->
             <?php if (count($activePetitions) === 0 && count($closedPetitions) === 0): ?>
                 <div class="no-petitions">
                     <p>Aucune pétition disponible pour le moment.</p>
@@ -261,14 +289,16 @@ foreach ($petitions as $petition) {
         </div>
     </main>
 
-    <!-- Footer -->
+    <!-- Pied de page -->
     <footer class="footer">
         <div class="container">
             <div class="footer-grid">
+                <!-- Section À propos -->
                 <div class="footer-about">
                     <h3>CitoyenVoix</h3>
                     <p>Une plateforme démocratique permettant aux citoyens de signer des pétitions pour faire entendre leur voix sur les sujets qui leur tiennent à cœur.</p>
                 </div>
+                <!-- Liens rapides -->
                 <div class="footer-links">
                     <h4>Liens rapides</h4>
                     <ul>
@@ -278,14 +308,17 @@ foreach ($petitions as $petition) {
                         <li><a href="../espace_admin/login.php">Administration</a></li>
                     </ul>
                 </div>
+                <!-- Réseaux sociaux -->
                 <div class="footer-social">
                     <h4>Suivez-nous</h4>
                     <div class="social-icons">
+                        <!-- Icône Facebook -->
                         <a href="#" class="social-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
                             </svg>
                         </a>
+                        <!-- Icône Twitter -->
                         <a href="#" class="social-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
@@ -294,39 +327,45 @@ foreach ($petitions as $petition) {
                     </div>
                 </div>
             </div>
+            <!-- Copyright -->
             <div class="footer-bottom">
                 <p>© 2025 CitoyenVoix. Tous droits réservés.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Modal for Petition Details -->
+    <!-- Modal pour afficher les détails d'une pétition -->
     <div id="petitionModal" class="modal">
         <div class="modal-overlay" id="modalOverlay"></div>
         <div class="modal-content">
             <button class="modal-close" id="modalClose">&times;</button>
             <div id="modalBody">
-                <!-- Content will be inserted by JavaScript -->
+                <!-- Le contenu sera inséré dynamiquement par JavaScript -->
             </div>
         </div>
     </div>
 
     <script>
+        // Récupération des éléments du modal
         const modal = document.getElementById('petitionModal');
         const modalOverlay = document.getElementById('modalOverlay');
         const modalClose = document.getElementById('modalClose');
         const modalBody = document.getElementById('modalBody');
 
+        // Initialisation des écouteurs d'événements quand le DOM est chargé
         document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
         });
 
+        // Configuration des écouteurs d'événements pour le modal
         function setupEventListeners() {
             modalClose.addEventListener('click', closeModal);
             modalOverlay.addEventListener('click', closeModal);
         }
 
+        // Fonction pour afficher les détails d'une pétition dans le modal
         function showPetitionDetails(petition) {
+            // Construction du HTML pour le contenu du modal
             modalBody.innerHTML = `
                 <div class="modal-header">
                     <h2 class="modal-title">${petition.titreP}</h2>
@@ -362,26 +401,30 @@ foreach ($petitions as $petition) {
                 </div>
             `;
             
+            // Affichage du modal
             modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden'; // Empêche le défilement de la page
         }
 
+        // Fonction pour fermer le modal
         function closeModal() {
             modal.classList.remove('active');
-            document.body.style.overflow = '';
+            document.body.style.overflow = ''; // Rétablit le défilement
         }
     </script>
 
     <script>
         // Gestion de la pétition populaire en temps réel avec XMLHttpRequest
-        let currentPopularPetitionId = null;
+        let currentPopularPetitionId = null; // Stocke l'ID de la pétition populaire actuelle
 
+        // Fonction pour charger la pétition populaire depuis le serveur
         function loadPopularPetition() {
             const xhr = new XMLHttpRequest();
             xhr.open('GET', 'get_popular_data.php', true);
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.timeout = 5000; // Timeout de 5 secondes
             
+            // Gestionnaire pour le changement d'état de la requête
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
@@ -403,11 +446,13 @@ foreach ($petitions as $petition) {
                 }
             };
             
+            // Gestionnaire de timeout
             xhr.ontimeout = function() {
                 console.error('Timeout lors du chargement de la pétition populaire');
                 showNoPopularPetition();
             };
             
+            // Gestionnaire d'erreur réseau
             xhr.onerror = function() {
                 console.error('Erreur réseau lors du chargement de la pétition populaire');
                 showNoPopularPetition();
@@ -416,12 +461,13 @@ foreach ($petitions as $petition) {
             xhr.send();
         }
 
+        // Fonction pour mettre à jour l'affichage de la pétition populaire
         function updatePopularPetitionDisplay(data) {
             const popularCard = document.getElementById('popularPetitionCard');
             
             // Vérifier si la pétition a changé
             if (currentPopularPetitionId !== data.petition_id) {
-                // Animation de transition
+                // Animation de transition pour le changement de pétition
                 popularCard.classList.add('popular-updating');
                 setTimeout(() => {
                     popularCard.innerHTML = createPopularPetitionHTML(data);
@@ -429,11 +475,12 @@ foreach ($petitions as $petition) {
                     currentPopularPetitionId = data.petition_id;
                 }, 500);
             } else {
-                // Mise à jour simple des compteurs
+                // Mise à jour simple des compteurs si c'est la même pétition
                 updatePopularPetitionCounters(data);
             }
         }
 
+        // Fonction pour créer le HTML d'une pétition populaire
         function createPopularPetitionHTML(data) {
             const isActive = new Date(data.dateFinP) > new Date();
             const statusText = isActive ? 'Active' : 'Fermée';
@@ -441,6 +488,7 @@ foreach ($petitions as $petition) {
             
             return `
                 <div class="popular-transition-enter-active">
+                    <!-- Badge indiquant qu'il s'agit de la pétition la plus populaire -->
                     <div class="popular-badge">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -448,6 +496,7 @@ foreach ($petitions as $petition) {
                         PÉTITION LA PLUS POPULAIRE
                     </div>
                     
+                    <!-- Badge de statut (actif/fermé) -->
                     <div class="status-badge ${statusClass}" style="margin-bottom: 1rem;">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             ${isActive ? 
@@ -458,6 +507,7 @@ foreach ($petitions as $petition) {
                         ${statusText}
                     </div>
                     
+                    <!-- Contenu principal de la pétition populaire -->
                     <div class="popular-content">
                         <div class="popular-info">
                             <h3>${data.titreP}</h3>
@@ -483,6 +533,7 @@ foreach ($petitions as $petition) {
                             </div>
                         </div>
                         
+                        <!-- Statistiques de la pétition -->
                         <div class="popular-stats">
                             <div class="popular-signature-count">
                                 <div class="popular-count" id="popularSignatureCount">${data.signature_count}</div>
@@ -502,6 +553,7 @@ foreach ($petitions as $petition) {
             `;
         }
 
+        // Fonction pour mettre à jour les compteurs de la pétition populaire
         function updatePopularPetitionCounters(data) {
             const countElement = document.getElementById('popularSignatureCount');
             if (countElement) {
@@ -521,6 +573,7 @@ foreach ($petitions as $petition) {
             }
         }
 
+        // Fonction pour animer un compteur numérique
         function animateCounter(element, start, end, duration) {
             const startTime = performance.now();
             
@@ -544,6 +597,7 @@ foreach ($petitions as $petition) {
             requestAnimationFrame(step);
         }
 
+        // Fonction pour afficher un message quand il n'y a pas de pétition populaire
         function showNoPopularPetition(message = 'Aucune pétition populaire à afficher') {
             const popularCard = document.getElementById('popularPetitionCard');
             popularCard.innerHTML = `
@@ -558,7 +612,7 @@ foreach ($petitions as $petition) {
             `;
         }
 
-        // Charger la pétition populaire au démarrage
+        // Charger la pétition populaire au démarrage et configurer les mises à jour périodiques
         document.addEventListener('DOMContentLoaded', function() {
             loadPopularPetition();
             
@@ -567,21 +621,25 @@ foreach ($petitions as $petition) {
         });
     </script>
 
+
     <script>
+        // Classe pour gérer la mise à jour en temps réel des compteurs de signatures
         class SignatureUpdater {
             constructor() {
-                this.updateInterval = 3000; // 3 secondes
-                this.isUpdating = false;
-                this.petitionIds = [];
+                this.updateInterval = 3000; // Intervalle de mise à jour de 3 secondes
+                this.isUpdating = false; // Verrou pour éviter les mises à jour simultanées
+                this.petitionIds = []; // Stocke les IDs des pétitions à surveiller
                 this.init();
             }
 
+            // Initialisation du système de mise à jour
             init() {
                 this.collectPetitionIds();
                 this.startAutoUpdate();
                 this.setupEventListeners();
             }
 
+            // Collecte tous les IDs de pétitions depuis le DOM
             collectPetitionIds() {
                 const signatureElements = document.querySelectorAll('[id^="signature-count-"]');
                 this.petitionIds = Array.from(signatureElements).map(element => 
@@ -589,22 +647,25 @@ foreach ($petitions as $petition) {
                 );
             }
 
+            // Met à jour tous les compteurs de signatures
             updateAllCounts() {
                 if (this.isUpdating) return;
                 
                 this.isUpdating = true;
                 
-                // Utiliser XMLHttpRequest au lieu de fetch
+                // Crée des promesses pour chaque mise à jour individuelle
                 const promises = this.petitionIds.map(petitionId => 
                     this.updateSingleCount(petitionId)
                 );
                 
+                // Réinitialise le verrou une fois toutes les mises à jour terminées
                 Promise.allSettled(promises)
                     .finally(() => {
                         this.isUpdating = false;
                     });
             }
 
+            // Met à jour le compteur d'une pétition spécifique
             updateSingleCount(petitionId) {
                 return new Promise((resolve) => {
                     const xhr = new XMLHttpRequest();
@@ -653,6 +714,7 @@ foreach ($petitions as $petition) {
                 });
             }
 
+            // Anime un compteur numérique avec une transition fluide
             animateCounter(element, start, end, duration) {
                 return new Promise(resolve => {
                     const startTime = performance.now();
@@ -684,6 +746,7 @@ foreach ($petitions as $petition) {
                 });
             }
 
+            // Démarre les mises à jour automatiques
             startAutoUpdate() {
                 // Première mise à jour après 2 secondes
                 setTimeout(() => this.updateAllCounts(), 2000);
@@ -692,6 +755,7 @@ foreach ($petitions as $petition) {
                 setInterval(() => this.updateAllCounts(), this.updateInterval);
             }
 
+            // Configure les écouteurs d'événements pour les mises à jour contextuelles
             setupEventListeners() {
                 // Mettre à jour quand la page redevient visible
                 document.addEventListener('visibilitychange', () => {
@@ -712,28 +776,31 @@ foreach ($petitions as $petition) {
             }
         }
 
-        // Initialiser le système de mise à jour
+        // Initialiser le système de mise à jour des signatures
         document.addEventListener('DOMContentLoaded', function() {
             window.signatureUpdater = new SignatureUpdater();
         });
     </script>
 
     <script>
+        // Classe pour gérer les notifications de nouvelles pétitions
         class PetitionNotification {
             constructor() {
                 this.checkInterval = 5000; // Vérifier toutes les 5 secondes
-                this.lastCheckTime = 0;
-                this.isChecking = false;
-                this.notificationContainer = null;
+                this.lastCheckTime = 0; // Timestamp de la dernière vérification
+                this.isChecking = false; // Verrou pour éviter les vérifications simultanées
+                this.notificationContainer = null; // Conteneur des notifications
                 this.init();
             }
 
+            // Initialisation du système de notification
             init() {
                 this.createNotificationContainer();
                 this.startPolling();
                 this.setupEventListeners();
             }
 
+            // Crée le conteneur pour les notifications
             createNotificationContainer() {
                 this.notificationContainer = document.createElement('div');
                 this.notificationContainer.id = 'petition-notifications';
@@ -747,6 +814,7 @@ foreach ($petitions as $petition) {
                 document.body.appendChild(this.notificationContainer);
             }
 
+            // Démarre la vérification périodique des nouvelles pétitions
             startPolling() {
                 // Première vérification après 2 secondes
                 setTimeout(() => this.checkForNewPetitions(), 2000);
@@ -755,6 +823,7 @@ foreach ($petitions as $petition) {
                 setInterval(() => this.checkForNewPetitions(), this.checkInterval);
             }
 
+            // Vérifie s'il y a de nouvelles pétitions sur le serveur
             checkForNewPetitions() {
                 if (this.isChecking) return;
                 
@@ -788,12 +857,14 @@ foreach ($petitions as $petition) {
                 xhr.send();
             }
 
+            // Traite la réponse du serveur
             handleResponse(response) {
                 if (response.success && response.has_new_petition && response.petition) {
                     this.showNewPetitionNotification(response.petition, response.message);
                 }
             }
 
+            // Affiche une notification pour une nouvelle pétition
             showNewPetitionNotification(petition, message) {
                 // Vérifier si une notification pour cette pétition existe déjà
                 const existingNotifications = this.notificationContainer.querySelectorAll('.new-petition-notification');
@@ -823,6 +894,7 @@ foreach ($petitions as $petition) {
                 notification.innerHTML = `
                     <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
                         <div style="flex-shrink: 0;">
+                            <!-- Icône d'information -->
                             <svg style="width: 1.5rem; height: 1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                             </svg>
@@ -838,6 +910,7 @@ foreach ($petitions as $petition) {
                                 ${message}
                             </p>
                         </div>
+                        <!-- Bouton de fermeture -->
                         <button class="notification-close" style="background: none; border: none; color: white; cursor: pointer; padding: 0.25rem; opacity: 0.7; transition: opacity 0.2s;">
                             <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -846,17 +919,17 @@ foreach ($petitions as $petition) {
                     </div>
                 `;
 
-                // Ajouter au conteneur
+                // Ajouter au conteneur (en haut)
                 this.notificationContainer.insertBefore(notification, this.notificationContainer.firstChild);
 
                 // Fermer au clic sur la croix
                 const closeBtn = notification.querySelector('.notification-close');
                 closeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); // Empêche la redirection
                     this.removeNotification(notification);
                 });
 
-                // Rediriger vers la pétition au clic
+                // Rediriger vers la pétition au clic sur la notification
                 notification.addEventListener('click', () => {
                     window.location.href = `signature.php?id=${petition.idP}`;
                 });
@@ -869,6 +942,7 @@ foreach ($petitions as $petition) {
                 }, 8000);
             }
 
+            // Supprime une notification avec animation
             removeNotification(notification) {
                 notification.style.animation = 'slideOutRight 0.5s ease-in';
                 setTimeout(() => {
@@ -878,6 +952,7 @@ foreach ($petitions as $petition) {
                 }, 500);
             }
 
+            // Configure les écouteurs d'événements supplémentaires
             setupEventListeners() {
                 // Recharger la page quand elle redevient visible
                 document.addEventListener('visibilitychange', () => {
@@ -888,7 +963,7 @@ foreach ($petitions as $petition) {
             }
         }
 
-        // Initialiser le système de notification
+        // Initialiser le système de notification des nouvelles pétitions
         document.addEventListener('DOMContentLoaded', function() {
             window.petitionNotifier = new PetitionNotification();
         });

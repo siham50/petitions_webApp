@@ -1,28 +1,38 @@
 <?php
+// Inclusion du fichier de configuration de la base de données
 require_once __DIR__ . '/../includes/database.php';
 
+// Vérification de la présence de l'ID de pétition dans l'URL
 if (!isset($_GET['id']) || empty($_GET['id'])) {
+    // Redirection vers la liste des pétitions si aucun ID n'est fourni
     header('Location: liste_petitions.php');
     exit;
 }
 
+// Récupération et sécurisation de l'ID de pétition
 $petitionId = $_GET['id'];
 
+// Préparation et exécution de la requête pour récupérer les informations de la pétition
 $stmt = $pdo->prepare("SELECT * FROM petition WHERE idP = ?");
 $stmt->execute([$petitionId]);
 $petition = $stmt->fetch();
 
+// Vérification si la pétition existe
 if (!$petition) {
+    // Redirection si la pétition n'existe pas
     header('Location: liste_petitions.php');
     exit;
 }
 
+// Vérification si la pétition est encore active (date de fin non dépassée)
 $isActive = strtotime($petition['dateFinP']) > time();
 if (!$isActive) {
+    // Redirection si la pétition est fermée
     header('Location: liste_petitions.php');
     exit;
 }
 
+// Comptage du nombre de signatures existantes pour cette pétition
 $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM signature WHERE idP = ?");
 $stmt->execute([$petitionId]);
 $signatureCount = $stmt->fetch()['count'];
@@ -37,12 +47,14 @@ $signatureCount = $stmt->fetch()['count'];
     <link rel="stylesheet" href="signature.css">
 </head>
 <body>
-    <!-- Header -->
+    <!-- En-tête du site -->
     <header class="header">
         <div class="container">
             <div class="header-content">
+                <!-- Section du logo -->
                 <div class="logo-section">
                     <div class="logo-icon">
+                        <!-- Icône SVG du document (logo) -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
                             <polyline points="14 2 14 8 20 8"/>
@@ -56,6 +68,7 @@ $signatureCount = $stmt->fetch()['count'];
                         <p class="logo-subtitle">Plateforme de pétitions citoyennes</p>
                     </div>
                 </div>
+                <!-- Navigation principale -->
                 <nav class="nav-menu">
                     <a href="#" class="nav-link">À propos</a>
                     <a href="#" class="nav-link">Contact</a>
@@ -64,10 +77,11 @@ $signatureCount = $stmt->fetch()['count'];
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Contenu principal -->
     <main>
         <div class="signature-container">
             <div class="container">
+                <!-- Bouton de retour vers la liste des pétitions -->
                 <a href="liste_petitions.php" class="back-button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"/>
@@ -76,22 +90,23 @@ $signatureCount = $stmt->fetch()['count'];
                     Retour aux pétitions
                 </a>
 
-                <!-- Message de succès -->
+                <!-- Message de succès après signature -->
                 <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
                     <div class="success-message">
                         <p> Merci ! Votre signature a été enregistrée avec succès.</p>
                     </div>
                 <?php endif; ?>
 
-                <!-- Message d'erreur -->
+                <!-- Message d'erreur en cas de problème -->
                 <?php if (isset($_GET['error'])): ?>
                     <div class="error-message">
                         <p> <?php echo htmlspecialchars($_GET['error']); ?></p>
                     </div>
                 <?php endif; ?>
 
+                <!-- Grille principale avec informations et formulaire -->
                 <div class="signature-grid">
-                    <!-- Carte d'information -->
+                    <!-- Carte d'information sur la pétition -->
                     <div class="info-card">
                         <h3>À propos de cette pétition</h3>
                         <div class="info-section">
@@ -99,36 +114,41 @@ $signatureCount = $stmt->fetch()['count'];
                             <p><?php echo htmlspecialchars($petition['descriptionP']); ?></p>
                         </div>
                         
+                        <!-- Section de progression des signatures -->
                         <div class="info-section info-divider">
                             <div class="info-progress">
                                 <span class="info-progress-label">Signatures collectées</span>
                                 <span><?php echo $signatureCount; ?> signatures</span>
                             </div>
+                            <!-- Barre de progression visuelle -->
                             <div class="info-bar">
                                 <div class="info-bar-fill" style="width: 100%"></div>
                             </div>
                         </div>
                         
+                        <!-- Appel à l'action -->
                         <div class="info-callout">
                             <p><strong>Pourquoi signer ?</strong> Chaque signature rapproche cette pétition de son objectif et augmente son impact auprès des décideurs.</p>
                         </div>
                     </div>
                     
-                    <!-- Formulaire de signature -->
+                    <!-- Carte du formulaire de signature -->
                     <div class="form-card">
                         <h3>Signez cette pétition</h3>
                         <p class="card-subtitle">Vos informations seront utilisées uniquement pour cette pétition</p>
                         
+                        <!-- Formulaire de signature -->
                         <form method="POST" action="ajouter_signature.php" id="signatureForm">
-                            <!-- Champ caché pour l'ID de la pétition -->
+                            <!-- Champ caché pour transmettre l'ID de la pétition -->
                             <input type="hidden" name="idP" value="<?php echo $petitionId; ?>">
                             
-                            <!-- Titre de la pétition (lecture seule) -->
+                            <!-- Affichage du titre de la pétition (lecture seule) -->
                             <div class="form-group">
                                 <label class="form-label" for="titre">Titre de la pétition</label>
                                 <input type="text" id="titre" class="form-input" value="<?php echo htmlspecialchars($petition['titreP']); ?>" readonly>
                             </div>
 
+                            <!-- Ligne avec prénom et nom -->
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label" for="prenom">Prénom *</label>
@@ -142,12 +162,14 @@ $signatureCount = $stmt->fetch()['count'];
                                 </div>
                             </div>
                             
+                            <!-- Champ email -->
                             <div class="form-group">
                                 <label class="form-label" for="email">Email *</label>
                                 <input type="email" id="email" name="email" class="form-input" required
                                        value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
                             </div>
                             
+                            <!-- Champ pays (optionnel) -->
                             <div class="form-group">
                                 <label class="form-label" for="pays">Pays</label>
                                 <input type="text" id="pays" name="pays" class="form-input" 
@@ -155,6 +177,7 @@ $signatureCount = $stmt->fetch()['count'];
                                        placeholder="Entrez votre pays">
                             </div>
                             
+                            <!-- Pied du formulaire avec bouton de soumission -->
                             <div class="form-footer">
                                 <button type="submit" class="btn btn-primary btn-submit">Envoyer ma signature</button>
                                 <p>En signant, vous acceptez nos conditions d'utilisation et notre politique de confidentialité</p>
@@ -163,11 +186,12 @@ $signatureCount = $stmt->fetch()['count'];
                     </div>
                 </div>
 
-                <!-- Section des dernières signatures -->
+                <!-- Section des dernières signatures en temps réel -->
                 <div class="recent-signatures-section">
                     <div class="container">
                         <div class="recent-signatures-card">
                             <h3 class="recent-signatures-title">
+                                <!-- Icône de personnes -->
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                                     <circle cx="9" cy="7" r="4"/>
@@ -175,6 +199,7 @@ $signatureCount = $stmt->fetch()['count'];
                                     <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                                 </svg>
                                 Dernières signatures 
+                                <!-- Indicateur de mise à jour en direct -->
                                 <span class="live-indicator">
                                     <span class="live-dot"></span>
                                     EN DIRECT
@@ -182,17 +207,20 @@ $signatureCount = $stmt->fetch()['count'];
                             </h3>
                             <p class="recent-signatures-subtitle">Les 5 dernières personnes ayant signé cette pétition - Mise à jour instantanée</p>
                             
+                            <!-- Conteneur pour la liste des signatures (rempli dynamiquement) -->
                             <div id="recentSignaturesList" class="recent-signatures-list">
-                                <!-- Les signatures seront chargées ici dynamiquement -->
+                                <!-- État de chargement initial -->
                                 <div class="loading-signatures">
                                     <div class="loading-spinner-small"></div>
                                     <p>Chargement des signatures en temps réel...</p>
                                 </div>
                             </div>
                             
+                            <!-- Section de mise à jour manuelle -->
                             <div class="recent-signatures-update">
                                 <span id="lastUpdateTime"></span>
                                 <button onclick="loadRecentSignatures(true)" class="refresh-btn">
+                                    <!-- Icône de rafraîchissement -->
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M23 4v6h-6"/>
                                         <path d="M1 20v-6h6"/>
@@ -208,14 +236,16 @@ $signatureCount = $stmt->fetch()['count'];
         </div>
     </main>
 
-    <!-- Footer -->
+    <!-- Pied de page -->
     <footer class="footer">
         <div class="container">
             <div class="footer-grid">
+                <!-- Section À propos -->
                 <div class="footer-about">
                     <h3>CitoyenVoix</h3>
                     <p>Une plateforme démocratique permettant aux citoyens de signer des pétitions pour faire entendre leur voix sur les sujets qui leur tiennent à cœur.</p>
                 </div>
+                <!-- Liens rapides -->
                 <div class="footer-links">
                     <h4>Liens rapides</h4>
                     <ul>
@@ -225,14 +255,17 @@ $signatureCount = $stmt->fetch()['count'];
                         <li><a href="../espace_admin/login.php">Administration</a></li>
                     </ul>
                 </div>
+                <!-- Réseaux sociaux -->
                 <div class="footer-social">
                     <h4>Suivez-nous</h4>
                     <div class="social-icons">
+                        <!-- Icône Facebook -->
                         <a href="#" class="social-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
                             </svg>
                         </a>
+                        <!-- Icône Twitter -->
                         <a href="#" class="social-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
@@ -241,6 +274,7 @@ $signatureCount = $stmt->fetch()['count'];
                     </div>
                 </div>
             </div>
+            <!-- Copyright -->
             <div class="footer-bottom">
                 <p>© 2025 CitoyenVoix. Tous droits réservés.</p>
             </div>
@@ -248,19 +282,23 @@ $signatureCount = $stmt->fetch()['count'];
     </footer>
 
     <script>
-        // Validation du formulaire
+        // VALIDATION DU FORMULAIRE DE SIGNATURE
+        
+        // Écouteur d'événement pour la soumission du formulaire
         document.getElementById('signatureForm').addEventListener('submit', function(e) {
+            // Récupération et nettoyage des valeurs des champs
             const prenom = document.getElementById('prenom').value.trim();
             const nom = document.getElementById('nom').value.trim();
             const email = document.getElementById('email').value.trim();
             
+            // Validation des champs obligatoires
             if (!prenom || !nom || !email) {
-                e.preventDefault();
+                e.preventDefault(); // Empêche l'envoi du formulaire
                 alert('Veuillez remplir tous les champs obligatoires (*)');
                 return false;
             }
             
-            // Validation basique de l'email
+            // Validation du format de l'email avec une expression régulière
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 e.preventDefault();
@@ -269,28 +307,35 @@ $signatureCount = $stmt->fetch()['count'];
             }
         });
 
-        // Gestion des signatures récentes en temps réel
-        let lastSignaturesHash = '';
-        let autoRefreshInterval = null;
-        let retryCount = 0;
-        const MAX_RETRIES = 5;
+        // GESTION DES SIGNATURES RÉCENTES EN TEMPS RÉEL
+        
+        // Variables pour le système de mise à jour en temps réel
+        let lastSignaturesHash = ''; // Stocke le hash des dernières signatures pour détection de changements
+        let autoRefreshInterval = null; // Référence à l'intervalle de rafraîchissement automatique
+        let retryCount = 0; // Compteur de tentatives de reconnexion en cas d'erreur
+        const MAX_RETRIES = 5; // Nombre maximum de tentatives de reconnexion
 
+        // Fonction principale pour charger les signatures récentes
         function loadRecentSignatures(showLoading = false) {
-            const petitionId = <?php echo $petitionId; ?>;
+            const petitionId = <?php echo $petitionId; ?>; // ID de la pétition depuis PHP
             const refreshBtn = document.querySelector('.refresh-btn');
             const signaturesList = document.getElementById('recentSignaturesList');
             
+            // Affichage de l'indicateur de chargement si demandé
             if (showLoading && refreshBtn) {
                 refreshBtn.classList.add('loading');
             }
             
+            // Configuration de la requête AJAX
             const xhr = new XMLHttpRequest();
             xhr.open('GET', `get_recent_signatures.php?petition_id=${petitionId}&t=${new Date().getTime()}`, true);
             xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.timeout = 3000; // Timeout court pour réactivité
+            xhr.timeout = 3000; // Timeout court pour une meilleure réactivité
             
+            // Gestionnaire pour le changement d'état de la requête
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
+                    // Retirer l'indicateur de chargement
                     if (refreshBtn) refreshBtn.classList.remove('loading');
                     
                     if (xhr.status === 200) {
@@ -298,16 +343,17 @@ $signatureCount = $stmt->fetch()['count'];
                             const response = JSON.parse(xhr.responseText);
                             
                             if (response.success) {
+                                // Mise à jour de l'affichage avec les nouvelles données
                                 updateSignaturesDisplay(response.signatures);
                                 updateLastUpdateTime(response.timestamp);
                                 
-                                // Vérifier si de nouvelles signatures sont arrivées
+                                // Vérification des nouvelles signatures
                                 const currentHash = generateSignaturesHash(response.signatures);
                                 if (currentHash !== lastSignaturesHash && lastSignaturesHash !== '') {
-                                    // Nouvelle signature détectée - pas de notification
+                                    // Nouvelle signature détectée (logique silencieuse)
                                 }
                                 lastSignaturesHash = currentHash;
-                                retryCount = 0; // Réinitialiser le compteur d'erreurs
+                                retryCount = 0; // Réinitialisation du compteur d'erreurs
                                 
                             } else {
                                 showSignaturesError(response.message);
@@ -321,21 +367,25 @@ $signatureCount = $stmt->fetch()['count'];
                 }
             };
             
+            // Gestionnaire de timeout
             xhr.ontimeout = function() {
                 handleConnectionError();
             };
             
+            // Gestionnaire d'erreur réseau
             xhr.onerror = function() {
                 handleConnectionError();
             };
             
+            // Envoi de la requête
             xhr.send();
         }
 
+        // Fonction pour gérer les erreurs de connexion avec reconnexion automatique
         function handleConnectionError() {
             retryCount++;
             if (retryCount <= MAX_RETRIES) {
-                // Réessayer rapidement avec un backoff exponentiel
+                // Reconnexion avec backoff exponentiel (augmentation progressive du délai)
                 const delay = Math.min(1000 * Math.pow(1.5, retryCount), 5000);
                 setTimeout(() => loadRecentSignatures(), delay);
                 showSignaturesError(`Connexion perdue - nouvelle tentative dans ${delay/1000}s...`);
@@ -344,13 +394,17 @@ $signatureCount = $stmt->fetch()['count'];
             }
         }
 
+        // Fonction pour générer un hash des signatures (détection de changements)
         function generateSignaturesHash(signatures) {
+            // Création d'une chaîne unique basée sur les données des signatures
             return btoa(JSON.stringify(signatures.map(s => s.prenom + s.nom + s.date + s.heure)));
         }
 
+        // Fonction pour mettre à jour l'affichage des signatures
         function updateSignaturesDisplay(signatures) {
             const signaturesList = document.getElementById('recentSignaturesList');
             
+            // Gestion du cas où il n'y a aucune signature
             if (signatures.length === 0) {
                 signaturesList.innerHTML = `
                     <div class="no-signatures">
@@ -361,6 +415,7 @@ $signatureCount = $stmt->fetch()['count'];
                 return;
             }
             
+            // Construction du HTML pour chaque signature
             let html = '';
             signatures.forEach((signature, index) => {
                 // Marquer seulement la toute dernière signature comme nouvelle
@@ -369,7 +424,7 @@ $signatureCount = $stmt->fetch()['count'];
                     <div class="signature-item ${isNew ? 'new-signature' : ''}">
                         <div class="signature-info">
                             <div class="signature-avatar">
-                                ${signature.initials}
+                                ${signature.initials} <!-- Initiales de la personne -->
                             </div>
                             <div class="signature-details">
                                 <div class="signature-name">
@@ -382,15 +437,17 @@ $signatureCount = $stmt->fetch()['count'];
                             </div>
                         </div>
                         <div class="signature-time">
-                            ${signature.display_time}
+                            ${signature.display_time} <!-- Heure de signature formatée -->
                         </div>
                     </div>
                 `;
             });
             
+            // Injection du HTML dans le conteneur
             signaturesList.innerHTML = html;
         }
 
+        // Fonction pour mettre à jour l'heure de la dernière mise à jour
         function updateLastUpdateTime(timestamp) {
             const updateElement = document.getElementById('lastUpdateTime');
             if (updateElement) {
@@ -399,6 +456,7 @@ $signatureCount = $stmt->fetch()['count'];
             }
         }
 
+        // Fonction pour afficher les messages d'erreur
         function showSignaturesError(message) {
             const signaturesList = document.getElementById('recentSignaturesList');
             if (signaturesList) {
@@ -413,7 +471,9 @@ $signatureCount = $stmt->fetch()['count'];
             }
         }
 
-        // Configuration du rafraîchissement en temps réel
+        // GESTION DES MISE À JOUR AUTOMATIQUES
+
+        // Fonction pour démarrer les mises à jour en temps réel
         function startRealTimeUpdates() {
             // Rafraîchissement très rapide - toutes les 2 secondes
             autoRefreshInterval = setInterval(() => {
@@ -421,6 +481,7 @@ $signatureCount = $stmt->fetch()['count'];
             }, 2000);
         }
 
+        // Fonction pour arrêter les mises à jour automatiques
         function stopRealTimeUpdates() {
             if (autoRefreshInterval) {
                 clearInterval(autoRefreshInterval);
@@ -428,41 +489,48 @@ $signatureCount = $stmt->fetch()['count'];
             }
         }
 
-        // Gestion de la visibilité de la page pour optimiser les performances
+        // OPTIMISATIONS DES PERFORMANCES ET GESTION D'ÉTAT
+
+        // Gestion de la visibilité de la page pour économiser les ressources
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
+                // Arrêt des mises à jour quand la page n'est pas visible
                 stopRealTimeUpdates();
             } else {
+                // Redémarrage des mises à jour quand la page redevient visible
                 startRealTimeUpdates();
-                // Rafraîchir immédiatement quand la page redevient visible
+                // Rafraîchissement immédiat pour récupérer les données manquantes
                 loadRecentSignatures(true);
             }
         });
 
-        // Détection de la connexion réseau
+        // Détection des changements d'état de la connexion réseau
         window.addEventListener('online', function() {
+            // Redémarrage des mises à jour quand la connexion revient
             startRealTimeUpdates();
             loadRecentSignatures(true);
         });
 
         window.addEventListener('offline', function() {
+            // Arrêt des mises à jour en cas de perte de connexion
             stopRealTimeUpdates();
             showSignaturesError('Connexion perdue - vérifiez votre connexion internet');
         });
 
-        // Initialisation au chargement de la page
+        // INITIALISATION AU CHARGEMENT DE LA PAGE
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Premier chargement immédiat
+            // Premier chargement immédiat des signatures
             loadRecentSignatures(true);
             
-            // Démarrer les mises à jour en temps réel
+            // Démarrage des mises à jour en temps réel
             startRealTimeUpdates();
             
-            // Rafraîchir aussi quand le formulaire est soumis
+            // Configuration du rafraîchissement après soumission du formulaire
             const signatureForm = document.getElementById('signatureForm');
             if (signatureForm) {
                 signatureForm.addEventListener('submit', function() {
-                    // Rafraîchir immédiatement après la soumission
+                    // Rafraîchissement différé pour laisser le temps au serveur de traiter la signature
                     setTimeout(() => {
                         loadRecentSignatures(true);
                     }, 1000);
@@ -470,7 +538,8 @@ $signatureCount = $stmt->fetch()['count'];
             }
         });
 
-        // Nettoyage
+        // NETTOYAGE AVANT DÉCHARGEMENT DE LA PAGE
+
         window.addEventListener('beforeunload', function() {
             stopRealTimeUpdates();
         });
